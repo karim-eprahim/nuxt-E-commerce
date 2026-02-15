@@ -21,7 +21,8 @@ export default defineOAuthGitHubEventHandler({
       currentUser = await db.user.create({
         data: {
           email: user.email,
-          name: user.name,
+          name: user.name || user.login,
+          avatarUrl: user.avatar_url,
         },
       });
     }
@@ -39,6 +40,7 @@ export default defineOAuthGitHubEventHandler({
         },
       });
     }
+    console.log(currentUser)
     const transformedUser = sanitizeUser(currentUser);
     if(transformedUser) {
       await setUserSession(event, {

@@ -1,4 +1,4 @@
-import { type User } from "../../app/generated/prisma";
+import { type User } from "~~/app/generated/prisma";
 
 export const sanitizeUser = (user: User) => {
     if(!user) return null;
