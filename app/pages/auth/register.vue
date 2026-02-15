@@ -169,10 +169,7 @@ const form = ref<Payload>({
             </div>
           </div>
 
-          <Button variant="outline" type="button" :disabled="isLoading">
-            <Icon name="octicon:mark-github-24" />
-            Github
-          </Button>
+          <AuthSocialButton label="Github" icon="octicon:mark-github-24" />
         </div>
 
         <p class="px-8 text-center text-sm text-muted-foreground">
