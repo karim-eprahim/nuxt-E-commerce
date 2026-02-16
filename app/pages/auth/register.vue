@@ -5,43 +5,44 @@
 // const password = ref("");
 const confirmPassword = ref("");
 const isLoading = ref(false);
+const errorMessage = ref("");
 
 type Payload = {
   name: string;
   email: string;
   password: string;
-  confirmPassword: string;
 };
 
 const form = ref<Payload>({
   name: "",
   email: "",
   password: "",
-  confirmPassword: "",
 });
 
-// async function onSubmit(event: Event) {
-//   event.preventDefault()
+const onSubmit = async () => {
+  isLoading.value = true
+  errorMessage.value = ""
+  if (!checkConfirmPassword()) return
+  try {
+    await $fetch("/api/auth/register", {
+      method: "POST",
+      body: form.value,
+    })
+    navigateTo("/")
+    isLoading.value = false
+  } catch (error:any) {
+    isLoading.value = false
+    errorMessage.value = error.statusMessage
+  }
+}
 
-//   if (password.value !== confirmPassword.value) {
-//     alert("Passwords do not match!")
-//     return
-//   }
-
-//   isLoading.value = true
-
-//   // Simulate API call for Registration
-//   console.log('Registering user:', {
-//     name: name.value,
-//     email: email.value,
-//     password: password.value
-//   })
-
-//   setTimeout(() => {
-//     isLoading.value = false
-//     // Typically navigate to login or dashboard here
-//   }, 1000)
-// }
+const checkConfirmPassword = () => {
+  if (form.value.password !== confirmPassword.value) {
+    errorMessage.value = "Passwords do not match"
+    return false
+  }
+  return true
+}
 </script>
 
 <template>
@@ -94,7 +95,7 @@ const form = ref<Payload>({
         </div>
 
         <div class="grid gap-6">
-          <form>
+          <form @submit.prevent="onSubmit">
             <div class="grid gap-4">
               <div class="grid gap-1">
                 <Label class="sr-only" for="name">Full Name</Label>
@@ -144,7 +145,7 @@ const form = ref<Payload>({
                   placeholder="Confirm Password"
                   type="password"
                   :disabled="isLoading"
-                  v-model="form.confirmPassword"
+                  v-model="confirmPassword"
                   required
                 />
               </div>

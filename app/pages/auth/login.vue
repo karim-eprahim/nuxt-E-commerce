@@ -4,19 +4,22 @@ const email = ref("");
 const password = ref("");
 const isLoading = ref(false);
 
-async function onSubmit(event: Event) {
-  event.preventDefault();
-  isLoading.value = true;
-
-  // Simulate API call
-  console.log("Login attempt:", {
-    email: email.value,
-    password: password.value,
-  });
-
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 1000);
+const onSubmit = async () => {
+  isLoading.value = true
+  try {
+    await $fetch("/api/auth/login", {
+      method: "POST",
+      body: {
+        email: email.value,
+        password: password.value,
+      },
+    })
+    navigateTo("/")
+    isLoading.value = false
+  } catch (error) {
+    isLoading.value = false
+    console.log(error)
+  }
 }
 </script>
 
@@ -71,7 +74,7 @@ async function onSubmit(event: Event) {
         </div>
 
         <div class="grid gap-6">
-          <form @submit="onSubmit">
+          <form @submit.prevent="onSubmit">
             <div class="grid gap-4">
               <div class="grid gap-1">
                 <Label class="sr-only" for="email">Email</Label>
