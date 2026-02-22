@@ -151,9 +151,7 @@ const checkConfirmPassword = () => {
               </div>
 
               <Button :disabled="isLoading">
-                <span v-if="isLoading" class="mr-2 h-4 w-4 animate-spin"
-                  >⏳</span
-                >
+                <Icon name="mingcute:loading-fill" class="animate-spin" v-if="isLoading" />
                 Create Account
               </Button>
             </div>

@@ -22,30 +22,26 @@ export default () => {
   };
   // notification message handler
   const showError = (error: APIError) => {
-    toast({
-      variant: "destructive",
-      title: error.statusCode + "",
-      description: error.message ? error.message : error.statusMessage,
+    toast.error(error.statusCode + "", {
+      description: error.message ? error.message : error.statusMessage, position: "top-right"
     });
   };
 
   const showMessage = (content: {
     title: string;
     description: string;
-    variant:
-      | "default"
-      | "destructive"
-      | "warning"
-      | "success"
-      | "info"
-      | null
-      | undefined;
+    variant?: "default" | "destructive" | "warning" | "success" | "info" | null;
   }) => {
-    toast({
-      variant: content.variant,
-      title: content.title,
-      description: content.description,
-    });
+    const variant = content.variant;
+    if (variant === "success") {
+      toast.success(content.title, { description: content.description , position: "top-right" });
+    } else if (variant === "destructive" || variant === "warning") {
+      toast.error(content.title, { description: content.description , position: "top-right" });
+    } else if (variant === "info") {
+      toast.info(content.title, { description: content.description , position: "top-right" });
+    } else {
+      toast(content.title, { description: content.description , position: "top-right" });
+    }
   };
   return {
     isLoading,

@@ -1,12 +1,14 @@
 <script setup lang="ts">
 // Nuxt 4 auto-imports ref and components by default
+import { handelError } from "~~/server/utils/error";
 const email = ref("admin@gmail.com");
 const password = ref("admin123");
 
-const {toggleLoading,showError,showMessage , isLoading} = useStore();
+const { toggleLoading, showError, showMessage, isLoading } = useStore();
+const { fetch: refreshSession } = useUserSession();
 
 const onSubmit = async () => {
-  toggleLoading(true)
+  toggleLoading(true);
   try {
     await $fetch("/api/auth/login", {
       method: "POST",
@@ -14,15 +16,21 @@ const onSubmit = async () => {
         email: email.value,
         password: password.value,
       },
-    })
-    showMessage({title:'Welcom Back',description:'You have successfully logged in',variant:'success'})
-    navigateTo("/")
-  } catch (error) {
-    console.log(error)
+    });
+    await refreshSession();
+    showMessage({
+      title: "Welcom Back 👋",
+      description: "You have successfully logged in",
+      variant: "success",
+    });
+    await navigateTo("/");
+  } catch (error: any) {
+    const err = handelError(error);
+    showError(err);
   } finally {
-    toggleLoading(false)
+    toggleLoading(false);
   }
-}
+};
 </script>
 
 <template>
@@ -102,9 +110,7 @@ const onSubmit = async () => {
                 />
               </div>
               <Button :disabled="isLoading">
-                <span v-if="isLoading" class="mr-2 h-4 w-4 animate-spin"
-                  >⏳</span
-                >
+                <Icon name="mingcute:loading-fill" class="animate-spin" v-if="isLoading" />
                 Sign In with Email
               </Button>
             </div>
