@@ -1,11 +1,12 @@
 <script setup lang="ts">
 // Nuxt 4 auto-imports ref and components by default
-const email = ref("");
-const password = ref("");
-const isLoading = ref(false);
+const email = ref("admin@gmail.com");
+const password = ref("admin123");
+
+const {toggleLoading,showError,showMessage , isLoading} = useStore();
 
 const onSubmit = async () => {
-  isLoading.value = true
+  toggleLoading(true)
   try {
     await $fetch("/api/auth/login", {
       method: "POST",
@@ -14,11 +15,12 @@ const onSubmit = async () => {
         password: password.value,
       },
     })
+    showMessage({title:'Welcom Back',description:'You have successfully logged in',variant:'success'})
     navigateTo("/")
-    isLoading.value = false
   } catch (error) {
-    isLoading.value = false
     console.log(error)
+  } finally {
+    toggleLoading(false)
   }
 }
 </script>
@@ -66,7 +68,7 @@ const onSubmit = async () => {
       >
         <div class="flex flex-col space-y-2 text-center">
           <h1 class="text-2xl font-semibold tracking-tight">
-            Login to account
+            Login to account {{ isLoading }}
           </h1>
           <p class="text-sm text-muted-foreground">
             Enter your email below to access your dashboard
