@@ -1,4 +1,4 @@
-import { authSchema } from "~~/server/utils/validations";
+import { authSchema } from "~~/utils/validations";
 
 export default defineEventHandler(async(event) => {
     const {name , email , password} = await readValidatedBody(event , (body)=>authSchema.parse(body));

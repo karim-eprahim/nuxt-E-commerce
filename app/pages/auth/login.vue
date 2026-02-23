@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Nuxt 4 auto-imports ref and components by default
-import { handelError } from "~~/server/utils/error";
+import { handelError } from "~~/utils/error";
 const email = ref("admin@gmail.com");
 const password = ref("admin123");
 
@@ -110,7 +110,11 @@ const onSubmit = async () => {
                 />
               </div>
               <Button :disabled="isLoading">
-                <Icon name="mingcute:loading-fill" class="animate-spin" v-if="isLoading" />
+                <Icon
+                  name="mingcute:loading-fill"
+                  class="animate-spin"
+                  v-if="isLoading"
+                />
                 Sign In with Email
               </Button>
             </div>
