@@ -29,7 +29,7 @@ export default () => {
 
   const showMessage = (content: {
     title: string;
-    description: string;
+    description?: string;
     variant?: "default" | "destructive" | "warning" | "success" | "info" | null;
   }) => {
     const variant = content.variant;
