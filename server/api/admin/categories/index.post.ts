@@ -1,0 +1,26 @@
+import { categorySchema } from "~/utils/validations";
+
+export default defineEventHandler(async (event) => {
+  await requireUserSession(event);
+  const session = await getUserSession(event);
+  console.log(session);
+  if (session.user && session.user?.role == "ADMIN") {
+    const { name } = await readValidatedBody(event, (body) =>
+      categorySchema.parse(body),
+    );
+    const category = await db.category.create({
+      data: {
+        name,
+        userId:session.user.id
+      },
+    });
+    return category
+  } else {
+    throw createError({
+      statusCode: 401,
+      statusMessage:
+        "Unauthorized, You don't have permission to perform this action",
+    });
+  }
+  return null;
+});

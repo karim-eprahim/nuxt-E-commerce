@@ -1,6 +1,5 @@
 <script setup lang="ts">
 // Nuxt 4 auto-imports ref and components by default
-import { handelError } from "~~/utils/error";
 const email = ref("admin@gmail.com");
 const password = ref("admin123");
 
@@ -19,13 +18,13 @@ const onSubmit = async () => {
     });
     await refreshSession();
     showMessage({
-      title: "Welcom Back 👋",
+      title: "Welcome Back 👋",
       description: "You have successfully logged in",
       variant: "success",
     });
     await navigateTo("/");
   } catch (error: any) {
-    const err = handelError(error);
+    const err = handleError(error);
     showError(err);
   } finally {
     toggleLoading(false);
@@ -76,7 +75,7 @@ const onSubmit = async () => {
       >
         <div class="flex flex-col space-y-2 text-center">
           <h1 class="text-2xl font-semibold tracking-tight">
-            Login to account {{ isLoading }}
+            Login to account
           </h1>
           <p class="text-sm text-muted-foreground">
             Enter your email below to access your dashboard

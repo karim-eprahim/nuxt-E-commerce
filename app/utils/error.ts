@@ -1,4 +1,4 @@
-export const handelError = (error: any) => {
+export const handleError = (error: any) => {
     const generalMessage = "An unexpected error occured"
     let statusCode = 500;
     let statusMessage = "unexpected error";
