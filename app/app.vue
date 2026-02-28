@@ -1,4 +1,5 @@
 <template>
+  <NuxtLoadingIndicator />
   <Toaster richColors />
   <NuxtLayout>
     <NuxtPage />

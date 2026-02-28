@@ -3,7 +3,6 @@ import { categorySchema } from "~/utils/validations";
 export default defineEventHandler(async (event) => {
   await requireUserSession(event);
   const session = await getUserSession(event);
-  console.log(session);
   if (session.user && session.user?.role == "ADMIN") {
     const { name } = await readValidatedBody(event, (body) =>
       categorySchema.parse(body),

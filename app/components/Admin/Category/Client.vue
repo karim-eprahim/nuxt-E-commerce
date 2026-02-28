@@ -14,6 +14,8 @@
 </template>
 
 <script setup lang="ts">
+const { data: categories } = await useFetch("/api/admin/categories");
+console.log(categories.value);
 </script>
 
 <style scoped></style>

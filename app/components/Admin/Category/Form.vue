@@ -35,7 +35,7 @@
         </FormField>
       </div>
       <Button type="submit" :disabled="isLoading">
-        <Icon name="lucide:save" class="h-4 w-4" />
+        <!-- <Icon name="lucide:save" class="h-4 w-4" /> -->
         {{ actionLabel }}
       </Button>
     </form>
@@ -59,31 +59,16 @@ import type { RouteParams } from "~~/types";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 
-const { showError, showMessage, toggleLoading, isLoading, toggleAlertModal } =
-  useStore();
+const { showError, showMessage, toggleLoading, isLoading, toggleAlertModal } = useStore();
 const route = useRoute();
 const params = route.params as RouteParams;
 
-const isEditing = computed(
-  () => !!params.categoryId && params.categoryId !== "new",
-);
+const isEditing = computed(() => !!params.categoryId && params.categoryId !== "new");
 
-const title = computed(() =>
-  isEditing.value ? "Edit Category" : "Create Category",
-);
-const description = computed(() =>
-  isEditing.value
-    ? "Update category information"
-    : "Add a new category to your store",
-);
-const actionLabel = computed(() =>
-  isEditing.value ? "Save Changes" : "Create",
-);
-const toastMessage = computed(() =>
-  isEditing.value
-    ? "Category updated successfully"
-    : "Category created successfully",
-);
+const title = computed(() => isEditing.value ? "Edit Category" : "Create Category");
+const description = computed(() => isEditing.value ? "Update category information" : "Add a new category to your store");
+const actionLabel = computed(() => isEditing.value ? "Save Changes" : "Create");
+const toastMessage = computed(() => isEditing.value ? "Category updated successfully" : "Category created successfully");
 
 const { data: currentCategory } = await useFetch(
   `/api/admin/categories/${params.categoryId}`,
