@@ -11,10 +11,10 @@ export default defineEventHandler(async (event) => {
     const category = await db.category.create({
       data: {
         name,
-        userId:session.user.id
+        userId: session.user.id,
       },
     });
-    return category
+    return category;
   } else {
     throw createError({
       statusCode: 401,

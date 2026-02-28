@@ -3,7 +3,12 @@
     <div class="flex items-center justify-between">
       <Heading class="w-full" :title="title" :description="description">
         <template #action>
-          <Button @click="toggleAlertModal(true)" v-if="isEditing" variant="destructive" size="sm">
+          <Button
+            @click="toggleAlertModal(true)"
+            v-if="isEditing"
+            variant="destructive"
+            size="sm"
+          >
             <Icon name="lucide:trash" class="h-4 w-4" />
           </Button>
         </template>
@@ -14,12 +19,16 @@
       <div class="md:grid md:grid-cols-3 md:gap-8">
         <FormField v-slot="{ componentField }" name="name">
           <FormItem>
-            <FormLabel>Name</FormLabel>
+            <FormLabel>Category Name</FormLabel>
             <FormControl>
-              <Input placeholder="Category Name" v-bind="componentField" />
+              <Input
+                placeholder="e.g. Electronics, Clothing..."
+                v-bind="componentField"
+                :disabled="isLoading"
+              />
             </FormControl>
             <FormDescription>
-              This is the name of the category.
+              This name will be displayed in the store.
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -27,12 +36,12 @@
       </div>
       <Button type="submit" :disabled="isLoading">
         <Icon name="lucide:save" class="h-4 w-4" />
-        {{ action }}
+        {{ actionLabel }}
       </Button>
     </form>
 
     <!-- <Modal :isModalVisible="isOpen" :title="title" :description="description" :action="action" @onClose="isOpen = $event"> -->
-      <!-- <div class="grid gap-3">
+    <!-- <div class="grid gap-3">
             <Label for="name-1">Name</Label>
             <Input id="name-1" name="name" default-value="Pedro Duarte" />
           </div>
@@ -41,8 +50,7 @@
             <Input id="username-1" name="username" default-value="@peduarte" />
           </div> -->
     <!-- </Modal> -->
-     <AlertModal @onConfirm="deleteCategory"></AlertModal>
-
+    <AlertModal @onConfirm="deleteCategory"></AlertModal>
   </div>
 </template>
 
@@ -51,17 +59,39 @@ import type { RouteParams } from "~~/types";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 
-const { showError, showMessage, toggleLoading, isLoading, toggleAlertModal } = useStore();
-const title = ref("Edit Category");
-const description = ref("Edit a category");
-const toastMessage = ref("Category updated");
-const action = ref("Save Changes");
-const isEditing = ref(false);
-
+const { showError, showMessage, toggleLoading, isLoading, toggleAlertModal } =
+  useStore();
 const route = useRoute();
-const { data: currentCategory } = await useFetch(
-  `/api/admin/categories/${(route.params as RouteParams).categoryId}`,
+const params = route.params as RouteParams;
+
+const isEditing = computed(
+  () => !!params.categoryId && params.categoryId !== "new",
 );
+
+const title = computed(() =>
+  isEditing.value ? "Edit Category" : "Create Category",
+);
+const description = computed(() =>
+  isEditing.value
+    ? "Update category information"
+    : "Add a new category to your store",
+);
+const actionLabel = computed(() =>
+  isEditing.value ? "Save Changes" : "Create",
+);
+const toastMessage = computed(() =>
+  isEditing.value
+    ? "Category updated successfully"
+    : "Category created successfully",
+);
+
+const { data: currentCategory } = await useFetch(
+  `/api/admin/categories/${params.categoryId}`,
+  {
+    immediate: isEditing.value,
+  },
+);
+
 const formSchema = toTypedSchema(categorySchema);
 
 const form = useForm({
@@ -71,25 +101,38 @@ const form = useForm({
   },
 });
 
+// Sync form values if currentCategory is loaded asynchronously
+watch(
+  () => currentCategory.value,
+  (newData) => {
+    if (newData) {
+      form.setValues({
+        name: newData.name,
+      });
+    }
+  },
+  { immediate: true },
+);
+
 const onSubmit = form.handleSubmit(async (values) => {
   toggleLoading(true);
   try {
-    if(isEditing.value) {
-      // await useFetch(`/api/admin/categories/${(route.params as RouteParams).categoryId}`, {
-      //   method: "PUT",
-      //   body: values,
-      // });
-      console.log("Editing",values)
-    } else {
-      await useFetch("/api/admin/categories", {
-        method: "POST",
-        body: values,
-      });
-    }
+    const url = isEditing.value
+      ? `/api/admin/categories/${params.categoryId}`
+      : "/api/admin/categories";
+
+    const method = isEditing.value ? "PATCH" : "POST";
+
+    await $fetch(url, {
+      method,
+      body: values,
+    });
+
     showMessage({
-      title: title.value,
+      title: toastMessage.value,
       variant: "success",
     });
+
     navigateTo("/admin/categories");
   } catch (error) {
     const err = handleError(error);
@@ -100,22 +143,26 @@ const onSubmit = form.handleSubmit(async (values) => {
 });
 
 const deleteCategory = async () => {
+  if (!isEditing.value) return;
+
+  toggleLoading(true);
   try {
-    console.log("delete");
-    toggleLoading(true);
-    // await useFetch(`/api/admin/categories/${(route.params as RouteParams).categoryId}`, {
-    //   method: "DELETE",
-    // });
+    await $fetch(`/api/admin/categories/${params.categoryId}`, {
+      method: "DELETE",
+    });
+
     showMessage({
-      title: title.value,
+      title: "Category deleted",
       variant: "destructive",
     });
-    // navigateTo("/admin/categories");
+
+    navigateTo("/admin/categories");
   } catch (error) {
     const err = handleError(error);
     showError(err);
   } finally {
     toggleLoading(false);
+    toggleAlertModal(false);
   }
 };
 </script>
