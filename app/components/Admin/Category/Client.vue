@@ -11,10 +11,24 @@
       </template>
     </Heading>
   </div>
+  <DataTable v-if="status !== 'pending'" :data="categories" :columns="columns" columnToSearch="name" />
 </template>
 
 <script setup lang="ts">
-const { data: categories } = await useFetch("/api/admin/categories");
+const categories = ref<{
+  name: string;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string;
+}[]>([])
+const { data,status } = await useFetch("/api/admin/categories",{
+  key:"categories",
+});
+categories.value = data.value as any[]
+import DataTable from "@/components/DataTable.vue"
+import { columns } from "@/components/Admin/Category/columns"
+
 console.log(categories.value);
 </script>
 

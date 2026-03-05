@@ -50,7 +50,7 @@
             <Input id="username-1" name="username" default-value="@peduarte" />
           </div> -->
     <!-- </Modal> -->
-    <AlertModal @onConfirm="deleteCategory"></AlertModal>
+    <AlertModal v-if="isAlertModalVisible" @onConfirm="deleteCategory"></AlertModal>
   </div>
 </template>
 
@@ -59,7 +59,7 @@ import type { RouteParams } from "~~/types";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 
-const { showError, showMessage, toggleLoading, isLoading, toggleAlertModal } = useStore();
+const { showError, showMessage, toggleLoading, isLoading, toggleAlertModal,isAlertModalVisible } = useStore();
 const route = useRoute();
 const params = route.params as RouteParams;
 

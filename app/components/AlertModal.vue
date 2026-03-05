@@ -2,7 +2,10 @@
   <Modal :isModalVisible="isModalVisible" title="Are You Sure?" description="This action cannot be undone." action="Continue" @onClose="toggleAlertModal(false)">
     <div class="flex items-center justify-end space-x-2">
       <Button variant="outline" @click="toggleAlertModal(false)">Cancel</Button>
-      <Button variant="destructive" @click="onConfirm">Continue</Button>
+      <Button :disabled="isLoading" variant="destructive" @click="onConfirm">
+        <Spinner v-if="isLoading" class="animate-spin" />
+        Continue
+      </Button>
     </div>
   </Modal>
 </template>
