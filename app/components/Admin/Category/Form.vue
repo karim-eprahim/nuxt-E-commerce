@@ -4,7 +4,7 @@
       <Heading class="w-full" :title="title" :description="description">
         <template #action>
           <Button
-            @click="toggleAlertModal(true)"
+            @click="isAlertModalVisible = true"
             v-if="isEditing"
             variant="destructive"
             size="sm"
@@ -50,7 +50,9 @@
             <Input id="username-1" name="username" default-value="@peduarte" />
           </div> -->
     <!-- </Modal> -->
-    <AlertModal v-if="isAlertModalVisible" @onConfirm="deleteCategory"></AlertModal>
+    <AlertModal :isOpen="isAlertModalVisible" @onClose="isAlertModalVisible = false" @onConfirm="deleteCategory"></AlertModal>
+    <!-- <AlertModal  @onConfirm="deleteCategory" @onClose="isAlertModalVisible = false"></AlertModal> -->
+
   </div>
 </template>
 
@@ -59,9 +61,10 @@ import type { RouteParams } from "~~/types";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 
-const { showError, showMessage, toggleLoading, isLoading, toggleAlertModal,isAlertModalVisible } = useStore();
+const { showError, showMessage, toggleLoading, isLoading } = useStore();
 const route = useRoute();
 const params = route.params as RouteParams;
+const isAlertModalVisible = ref(false);
 
 const isEditing = computed(() => !!params.categoryId && params.categoryId !== "new");
 
@@ -147,7 +150,7 @@ const deleteCategory = async () => {
     showError(err);
   } finally {
     toggleLoading(false);
-    toggleAlertModal(false);
+    isAlertModalVisible.value = false;
   }
 };
 </script>

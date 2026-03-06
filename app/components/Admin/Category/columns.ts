@@ -39,63 +39,6 @@ export const columns: ColumnDef<Category>[] = [
       // // }, "Delete"), 
       // // ])
 
-      // return h(
-      //   DropdownMenu,
-      //   {},
-      //   {
-      //     default: () =>
-      //       h("div", { class: "relative" }, [
-      //         h(
-      //           DropdownMenuTrigger,
-      //           { asChild: true },
-      //           {
-      //             default: () =>
-      //               h(
-      //                 Button,
-      //                 {
-      //                   variant: "ghost",
-      //                   size: "icon",
-      //                   "aria-label": "More Options",
-      //                 },
-      //                 {
-      //                   default: () => h(MoreHorizontalIcon),
-      //                 },
-      //               ),
-      //           },
-      //         ),
-
-      //         h(
-      //           DropdownMenuContent,
-      //           {},
-      //           {
-      //             default: () => [
-      //               h(
-      //                 DropdownMenuItem,
-      //                 {
-      //                   onClick: () =>
-      //                     navigateTo(`/admin/categories/${category.id}`),
-      //                 },
-      //                 () => "Edit",
-      //               ),
-
-      //               h(
-      //                 DropdownMenuItem,
-      //                 {
-      //                   class: "text-red-500 hover:text-red-500",
-      //                   variant: "destructive",
-      //                   onClick: () => {
-      //                     console.log("Delete", category.id);
-      //                   },
-      //                 },
-      //                 () => "Delete",
-      //               ),
-      //             ],
-      //           },
-      //         ),
-      //       ]),
-      //   },
-      // );
-
       return h(`div`,{class:'relative'},h(ActionMenu,{category}))
     },
   },

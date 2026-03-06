@@ -50,20 +50,10 @@ const table = useVueTable({
 
 <template>
   <div>
-            <!-- <Input
-          placeholder="Filter emails..."
-          :value="table.getColumn(props.columnToSearch)?.getFilterValue() as string"
-          @onchange="(event) => table.getColumn(props.columnToSearch)?.setFilterValue(event.target.value)"
-          className="max-w-sm"
-        /> -->
-        <div class="flex items-center py-4">
-          <Input
-            placeholder="Filter..."
-            :value="table.getColumn(props.columnToSearch)?.getFilterValue() as string"
-            @update:model-value="table.getColumn(props.columnToSearch)?.setFilterValue($event)"
-            class="max-w-sm"
-          />
-        </div>
+    <div class="flex items-center py-4">
+      <Input placeholder="Filter..." :value="table.getColumn(props.columnToSearch)?.getFilterValue() as string"
+        @update:model-value="table.getColumn(props.columnToSearch)?.setFilterValue($event)" class="max-w-sm" />
+    </div>
 
     <div class="border rounded-md">
       <Table>
@@ -79,6 +69,11 @@ const table = useVueTable({
           <TableRow v-for="row in table.getRowModel().rows" :key="row.id">
             <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
               <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+            </TableCell>
+          </TableRow>
+          <TableRow v-if="table.getRowModel().rows.length === 0">
+            <TableCell :colspan="columns.length" class="h-24 text-center">
+              No results.
             </TableCell>
           </TableRow>
         </TableBody>

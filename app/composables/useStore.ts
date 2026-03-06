@@ -4,27 +4,22 @@ import { toast } from "vue-sonner";
 interface state {
   isLoading: boolean;
   appError: APIError | null;
-  isAlertModalVisible: boolean;
 }
 
 const state = reactive<state>({
   isLoading: false,
   appError: null,
-  isAlertModalVisible: false,
 });
 
 export default () => {
-  const { isLoading, appError, isAlertModalVisible } = toRefs(state);
+  const { isLoading, appError } = toRefs(state);
 
   const toggleLoading = (v: boolean) => {
     state.isLoading = v;
   };
   const toggleError = (error: APIError | null) => {
     state.appError = error;
-  };
-  const toggleAlertModal = (v: boolean) => {
-    state.isAlertModalVisible = v;
-  };
+  }
   // notification message handler
   const showError = (error: APIError) => {
     toast.error(error.statusCode + "", {
@@ -55,7 +50,5 @@ export default () => {
     showMessage,
     toggleLoading,
     toggleError,
-    isAlertModalVisible,
-    toggleAlertModal,
   };
 };

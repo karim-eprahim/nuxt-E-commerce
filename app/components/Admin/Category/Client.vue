@@ -15,21 +15,13 @@
 </template>
 
 <script setup lang="ts">
-const categories = ref<{
-  name: string;
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-}[]>([])
-const { data,status } = await useFetch("/api/admin/categories",{
-  key:"categories",
-});
-categories.value = data.value as any[]
 import DataTable from "@/components/DataTable.vue"
 import { columns } from "@/components/Admin/Category/columns"
 
-console.log(categories.value);
+const { data:categories, status } = await useFetch("/api/admin/categories", {
+  key: "categories",
+});
+
 </script>
 
 <style scoped></style>
