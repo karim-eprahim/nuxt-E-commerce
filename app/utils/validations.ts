@@ -11,5 +11,10 @@ export const categorySchema = z.object({
     // description: z.string().min(3),
     // image: z.string().min(3),
 })
+export const colorSchema = z.object({
+    name: z.string().min(1, { message: 'color name is required' }),
+    value: z.string().min(1, { message: 'color value is required' }).default('#000000'),
+})
 
 export type AuthSchema = z.infer<typeof authSchema>
+export type ColorSchema = z.infer<typeof colorSchema>

@@ -36,6 +36,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@nuxt/devtools": "^3.2.2",
     "@prisma/client": "^7.4.0",
     "@types/node": "^25.2.1",
     "prisma": "^7.4.0",
