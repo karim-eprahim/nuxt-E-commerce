@@ -19,7 +19,18 @@ export const sizeSchema = z.object({
     name: z.string().min(1, { message: 'size name is required' }),
     value: z.string().min(1, { message: 'size value is required' }),
 })
+export const productSchema = z.object({
+    name: z.string().min(1, { message: 'product name is required' }),
+    images: z.object({ url: z.string().min(1) }).array().min(1, { message: 'product images is required' }),
+    price: z.number().min(1, { message: 'product price is required' }),
+    categoryId: z.string().min(1, { message: 'product category is required' }),
+    colorId: z.string().min(1, { message: 'product color is required' }),
+    sizeId: z.string().min(1, { message: 'product size is required' }),
+    isFeatured: z.boolean().default(false).optional(),
+    isArchived: z.boolean().default(false).optional(),
+})
 
 export type AuthSchema = z.infer<typeof authSchema>
 export type ColorSchema = z.infer<typeof colorSchema>
 export type SizeSchema = z.infer<typeof sizeSchema>
+export type ProductSchema = z.infer<typeof productSchema>
