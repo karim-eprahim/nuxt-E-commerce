@@ -134,10 +134,6 @@
               <FormLabel class="text-sm font-medium">Images</FormLabel>
               <FormControl>
                 <ImageUpload :model-value="componentField.modelValue" @update:model-value="componentField.onChange" />
-                <pre>{{ componentField.modelValue }}</pre>
-                <!-- <ImageUpload :value="componentField.modelValue.map((img: any) => img.url)" @on-change="(url: string) => {
-                  componentField.onChange([...componentField.modelValue, { url }])
-                }" /> -->
               </FormControl>
               <FormMessage class="text-xs" />
             </FormItem>
@@ -149,11 +145,11 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <!-- Featured -->
-            <FormField v-slot="{ value, handleChange }" name="isFeatured">
+            <FormField v-slot="{ value }" name="isFeatured">
               <FormItem>
                 <div class="flex items-start gap-4 p-4 rounded-xl border transition-colors">
                   <FormControl>
-                    <Switch :checked="value" @update:checked="handleChange" :disabled="isLoading" class="mt-0.5" />
+                    <Switch :checked="value" @click="toggleValue(value, 'isFeatured')" class="mt-0.5" />
                   </FormControl>
                   <div>
                     <FormLabel class="text-sm font-medium cursor-pointer">Featured Product</FormLabel>
@@ -166,11 +162,11 @@
             </FormField>
 
             <!-- Archived -->
-            <FormField v-slot="{ value, handleChange }" name="isArchived">
+            <FormField v-slot="{ value }" name="isArchived">
               <FormItem>
                 <div class="flex items-start gap-4 p-4 rounded-xl border transition-colors">
                   <FormControl>
-                    <Switch :checked="value" @update:checked="handleChange" :disabled="isLoading" class="mt-0.5" />
+                    <Switch :checked="value" @click="toggleValue(value, 'isArchived')" class="mt-0.5" />
                   </FormControl>
                   <div>
                     <FormLabel class="text-sm font-medium cursor-pointer">Archive Product</FormLabel>
@@ -210,6 +206,7 @@
 import type { RouteParams } from "~~/types";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
+import Switch from '~/components/ui/switch/Switch.vue'
 
 const { showError, showMessage, toggleLoading, isLoading } = useStore();
 const route = useRoute();
@@ -256,6 +253,10 @@ const form = useForm({
       isArchived: false,
     },
 });
+type FormFields = keyof typeof form.values;
+const toggleValue = (value: boolean , field: FormFields) => {
+  form.setFieldValue(field, !value);
+};
 
 // ─── Submit ───────────────────────────────────────────────────────────────────
 const onSubmit = form.handleSubmit(async (values) => {
