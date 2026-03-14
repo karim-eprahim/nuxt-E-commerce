@@ -12,9 +12,9 @@ export default defineEventHandler(async (event) => {
         name,
         images:{
             createMany:{
-                data:{
+                data:[
                     ...images.map(img => img)
-                }
+                ]
             }
         },
         price,
