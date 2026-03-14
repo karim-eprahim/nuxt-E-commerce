@@ -10,9 +10,18 @@ export interface Products {
     url: string
   }[]
   price: number
-  categoryId: string
-  colorId: string
-  sizeId: string
+  category: {
+    name: string,
+    id: string
+  }
+  color: {
+    value: string,
+    id: string,
+  }
+  size: {
+    name: string,
+    id: string
+  }
   isFeatured?: boolean
   isArchived?: boolean
 }
@@ -25,8 +34,22 @@ export const columns: ColumnDef<Products>[] = [
   {
     accessorKey: "price",
     header: "Price",
-    cell: ({ row }) => {
-      const color = row.original.price;
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
+    cell: ({ row }) => row.original.category.name,
+  },
+  {
+    accessorKey: "size",
+    header: "Size",
+    cell: ({ row }) => row.original.size.name,
+  },
+  {
+    accessorKey: "color",
+    header: "Color",
+        cell: ({ row }) => {
+      const color = row.original.color.value;
       return h("div", { class: "flex items-center gap-2" }, [
         h("div", {
           class: "w-6 h-6 rounded-full border shadow-sm",
@@ -35,21 +58,6 @@ export const columns: ColumnDef<Products>[] = [
         h("span", { class: "text-muted-foreground text-sm" }, color),
       ]);
     },
-  },
-  {
-    accessorKey: "category",
-    header: "Category",
-    cell: ({ row }) => row.original.categoryId,
-  },
-  {
-    accessorKey: "size",
-    header: "Size",
-    cell: ({ row }) => row.original.sizeId,
-  },
-  {
-    accessorKey: "color",
-    header: "Color",
-    cell: ({ row }) => row.original.colorId,
   },
   {
     id: "actions",
