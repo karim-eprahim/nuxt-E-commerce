@@ -1,4 +1,4 @@
-import { colorSchema } from "~/utils/validations";
+import { productSchema } from "~/utils/validations";
 
 export default defineEventHandler(async (event) => {
   await requireUserSession(event);
@@ -12,21 +12,33 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const { name,value } = await readValidatedBody(event, (body) =>
-    colorSchema.parse(body),
+  const { name, price, isFeatured, isArchived, sizeId, colorId, categoryId , images } = await readValidatedBody(event, (body) =>
+    productSchema.parse(body),
   );
 
-  const colorId = event.context.params?.colorId;
+  const productId = event.context.params?.productId;
 
-  const color = await db.color.update({
+  const product = await db.product.update({
     where: {
-      id: colorId,
+      id: productId,
     },
     data: {
       name,
-      value,
+      price,
+      categoryId,
+      sizeId,
+      colorId,
+      images: {
+        deleteMany: {},
+        createMany: {
+          data: [...images.map((img) => img)],
+        },
+      },
+      isFeatured,
+      isArchived,
+      userId: session.user.id,
     },
   });
 
-  return color;
+  return product;
 });

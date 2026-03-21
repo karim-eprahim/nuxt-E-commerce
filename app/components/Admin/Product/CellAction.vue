@@ -6,7 +6,8 @@ const props = defineProps<{
 }>()
 const { toggleLoading, showMessage, showError } = useStore();
 const isAlertModalVisible = ref(false);
-const deleteColor = async () => {
+const deleteProduct = async () => {
+  console.log(props.products.id)
   toggleLoading(true);
   try {
     await $fetch(`/api/admin/products/${props.products.id}`, {
@@ -18,7 +19,7 @@ const deleteColor = async () => {
       variant: "success",
     });
 
-    await refreshNuxtData('colors')
+    await refreshNuxtData('products')
   } catch (error) {
     const err = handleError(error);
     showError(err);
@@ -52,6 +53,6 @@ const deleteColor = async () => {
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
-  <AlertModal :isOpen="isAlertModalVisible" @onConfirm="deleteColor" @onClose="isAlertModalVisible = false">
+  <AlertModal :isOpen="isAlertModalVisible" @onConfirm="deleteProduct" @onClose="isAlertModalVisible = false">
   </AlertModal>
 </template>

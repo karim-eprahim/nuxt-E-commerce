@@ -8,6 +8,9 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
+    cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+    cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
+    cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
     public: {
       cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
       uploadPreset: process.env.NUXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET

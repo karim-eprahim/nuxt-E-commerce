@@ -11,11 +11,14 @@
 
                 <!-- Remove Overlay -->
                 <div
-                    class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                    class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-end justify-center">
                     <button type="button" @click.stop="removeImage(index)"
-                        class="bg-destructive text-destructive-foreground p-2.5 rounded-full hover:scale-110 transition">
+                        class="bg-destructive text-destructive-foreground aspect-square w-12 rounded-lg hover:bg-destructive/50 transition flex items-center justify-center absolute top-0 right-0">
                         <Icon name="lucide:trash-2" class="w-5 h-5" />
                     </button>
+                    <Badge variant="outline" class="text-white">
+                        {{ getResourceName(images[index] as string).name }}
+                    </Badge>
                 </div>
 
             </div>
@@ -60,7 +63,6 @@ interface CloudinaryWidget {
     close: () => void
     destroy: () => void
 }
-console.log(useRuntimeConfig().public)
 declare global {
     interface Window {
         cloudinary?: {
@@ -99,7 +101,6 @@ watch(
 )
 
 const emitChange = () => {
-    console.log(images.value)
     emit(
         "update:modelValue",
         images.value.map((url) => ({ url }))
@@ -155,7 +156,11 @@ const openWidget = () => {
     widget.open()
 }
 
-const removeImage = (index: number) => {
+const removeImage = async (index: number) => {
+    const { public_id,name } = getResourceName(images.value[index] as string)
+    await $fetch(`/api/admin/products/image/${name}`, {
+      method: "DELETE",
+    });
     images.value.splice(index, 1)
     emitChange()
 }

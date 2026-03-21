@@ -1,29 +1,30 @@
 // columns.ts
 import type { ColumnDef, ColumnFiltersState } from "@tanstack/vue-table";
 import { h } from "vue";
-import ActionMenu from "@/components/Admin/Color/CellAction.vue";
+import ActionMenu from "@/components/Admin/Product/CellAction.vue";
 import { valueUpdater } from "@/lib/utils";
 
 export interface Products {
-  name: string
+  name: string;
+  id: string;
   images: {
-    url: string
-  }[]
-  price: number
+    url: string;
+  }[];
+  price: number;
   category: {
-    name: string,
-    id: string
-  }
+    name: string;
+    id: string;
+  };
   color: {
-    value: string,
-    id: string,
-  }
+    value: string;
+    id: string;
+  };
   size: {
-    name: string,
-    id: string
-  }
-  isFeatured?: boolean
-  isArchived?: boolean
+    name: string;
+    id: string;
+  };
+  isFeatured?: boolean;
+  isArchived?: boolean;
 }
 
 export const columns: ColumnDef<Products>[] = [
@@ -34,6 +35,7 @@ export const columns: ColumnDef<Products>[] = [
   {
     accessorKey: "price",
     header: "Price",
+    cell: ({ row }) => `$${row.original.price}`,
   },
   {
     accessorKey: "category",
@@ -48,7 +50,7 @@ export const columns: ColumnDef<Products>[] = [
   {
     accessorKey: "color",
     header: "Color",
-        cell: ({ row }) => {
+    cell: ({ row }) => {
       const color = row.original.color.value;
       return h("div", { class: "flex items-center gap-2" }, [
         h("div", {
@@ -60,24 +62,20 @@ export const columns: ColumnDef<Products>[] = [
     },
   },
   {
+    accessorKey: "isFeatured",
+    header: "Featured",
+    cell: ({ row }) => (row.original.isFeatured ? "Yes" : "No"),
+  },
+  {
+    accessorKey: "isArchived",
+    header: "Archived",
+    cell: ({ row }) => (row.original.isArchived ? "Yes" : "No"),
+  },
+  {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => {
       const products = row.original;
-
-      // return h("div", {
-      // // class: "flex items-center gap-2",
-      // // }, [
-      // // h("button", {
-      // // class: "btn btn-primary",
-      // // onClick: () => navigateTo(/admin/colors/${color.id}),
-      // // }, "Edit"),
-      // // h("button", {
-      // // class: "btn btn-error",
-      // // onClick: () => navigateTo(/admin/colors/${color.id}),
-      // // }, "Delete"),
-      // // ])
-
       return h(`div`, { class: "relative" }, h(ActionMenu, { products }));
     },
   },

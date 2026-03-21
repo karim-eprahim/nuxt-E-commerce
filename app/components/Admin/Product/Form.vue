@@ -18,9 +18,22 @@
       <!-- Form -->
       <form @submit.prevent="onSubmit" class="space-y-8">
 
+        <!-- Section: Images -->
+        <div>
+          <FormField v-slot="{ componentField }" name="images">
+            <FormItem>
+              <FormLabel class="text-md font-bold uppercase tracking-widest border-b">Product Images</FormLabel>
+              <FormControl>
+                <ImageUpload :model-value="componentField.modelValue" @update:model-value="componentField.onChange" />
+              </FormControl>
+              <FormMessage class="text-xs" />
+            </FormItem>
+          </FormField>
+        </div>
+
         <!-- Section: Basic Info -->
         <div>
-          <h2 class="text-xs font-semibold uppercase tracking-widest mb-4">Basic Information</h2>
+          <h2 class="text-md font-bold uppercase tracking-widest mb-4">Basic Information</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             <!-- Product Name -->
@@ -57,7 +70,7 @@
 
         <!-- Section: Classification -->
         <div>
-          <h2 class="text-xs font-semibold uppercase tracking-widest mb-4">Classification</h2>
+          <h2 class="text-md font-bold uppercase tracking-widest mb-4">Classification</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             <!-- Category -->
@@ -127,53 +140,33 @@
           </div>
         </div>
 
-        <!-- Section: Images -->
-        <div>
-          <FormField v-slot="{ componentField }" name="images">
-            <FormItem>
-              <FormLabel class="text-sm font-medium">Images</FormLabel>
-              <FormControl>
-                <ImageUpload :model-value="componentField.modelValue" @update:model-value="componentField.onChange" />
-              </FormControl>
-              <FormMessage class="text-xs" />
-            </FormItem>
-          </FormField>
-        </div>
         <!-- Section: Visibility -->
         <div>
-          <h2 class="text-xs font-semibold uppercase tracking-widest mb-4">Visibility</h2>
+          <h2 class="text-md font-bold uppercase tracking-widest mb-4">Visibility</h2>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             <!-- Featured -->
-            <FormField v-slot="{ value }" name="isFeatured">
+            <FormField v-slot="{ componentField }" name="isFeatured">
               <FormItem>
                 <div class="flex items-start gap-4 p-4 rounded-xl border transition-colors">
                   <FormControl>
-                    <Switch :checked="value" @click="toggleValue(value, 'isFeatured')" class="mt-0.5" />
+                    <FormSwitch :disabled="false" :model-value="componentField.modelValue"
+                      @update:model-value="componentField.onChange" label="Featured Product"
+                      description="Show this product on the homepage and featured sections." />
                   </FormControl>
-                  <div>
-                    <FormLabel class="text-sm font-medium cursor-pointer">Featured Product</FormLabel>
-                    <FormDescription class="text-xs mt-0.5">
-                      Show this product on the homepage and featured sections.
-                    </FormDescription>
-                  </div>
                 </div>
               </FormItem>
             </FormField>
 
             <!-- Archived -->
-            <FormField v-slot="{ value }" name="isArchived">
+            <FormField v-slot="{ componentField }" name="isArchived">
               <FormItem>
                 <div class="flex items-start gap-4 p-4 rounded-xl border transition-colors">
                   <FormControl>
-                    <Switch :checked="value" @click="toggleValue(value, 'isArchived')" class="mt-0.5" />
+                    <FormSwitch :disabled="false" :model-value="componentField.modelValue"
+                      @update:model-value="componentField.onChange" label="Archive Product"
+                      description="Hide this product from the store without deleting it." />
                   </FormControl>
-                  <div>
-                    <FormLabel class="text-sm font-medium cursor-pointer">Archive Product</FormLabel>
-                    <FormDescription class="text-xs mt-0.5">
-                      Hide this product from the store without deleting it.
-                    </FormDescription>
-                  </div>
                 </div>
               </FormItem>
             </FormField>
@@ -206,7 +199,6 @@
 import type { RouteParams } from "~~/types";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
-import Switch from '~/components/ui/switch/Switch.vue'
 
 const { showError, showMessage, toggleLoading, isLoading } = useStore();
 const route = useRoute();
@@ -253,16 +245,12 @@ const form = useForm({
       isArchived: false,
     },
 });
-type FormFields = keyof typeof form.values;
-const toggleValue = (value: boolean , field: FormFields) => {
-  form.setFieldValue(field, !value);
-};
 
 // ─── Submit ───────────────────────────────────────────────────────────────────
 const onSubmit = form.handleSubmit(async (values) => {
   toggleLoading(true);
   try {
-    const url    = isEditing.value ? `/api/admin/products/${params.productId}` : "/api/admin/products";
+    const url = isEditing.value ? `/api/admin/products/${params.productId}` : "/api/admin/products";
     const method = isEditing.value ? "PATCH" : "POST";
 
     await $fetch(url, { method, body: { ...values } });
@@ -278,6 +266,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
 // ─── Delete ───────────────────────────────────────────────────────────────────
 const deleteProduct = async () => {
+  console.log(params.productId)
   if (!isEditing.value) return;
   toggleLoading(true);
   try {
