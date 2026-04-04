@@ -1,8 +1,9 @@
 <script setup lang="ts">
-// Nuxt 4 auto-imports ref and components by default
 const email = ref("admin@gmail.com");
 const password = ref("admin123");
-
+definePageMeta({
+  layout: 'blank',
+})
 const { toggleLoading, showError, showMessage, isLoading } = useStore();
 const { fetch: refreshSession } = useUserSession();
 
