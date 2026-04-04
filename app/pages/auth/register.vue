@@ -1,8 +1,7 @@
 <script setup lang="ts">
-// Nuxt 4 state
-// const name = ref("");
-// const email = ref("");
-// const password = ref("");
+definePageMeta({
+  layout: 'blank',
+})
 const confirmPassword = ref("");
 const isLoading = ref(false);
 const errorMessage = ref("");
