@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  await requireUserSession(event);
+  // await requireUserSession(event);
   
   const productId = event.context.params?.productId;
   const product = await db.product.findUnique({
