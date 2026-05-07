@@ -11,6 +11,8 @@ export default defineNuxtConfig({
     cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
     cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
     cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    stripeSecret: process.env.NUXT_STRIPE_SECRET,
+    stripeWebhookSecret: process.env.NUXT_STRIPE_WEBHOOK_SECRET,
     public: {
       cloudinaryCloudName: process.env.NUXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
       uploadPreset: process.env.NUXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET

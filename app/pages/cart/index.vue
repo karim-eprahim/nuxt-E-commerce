@@ -208,6 +208,7 @@
 <script setup lang="ts">
 const { items, total, quantity, removeItem, updateQuantity, clearCart } = useCart();
 const { showMessage } = useStore();
+const route = useRoute()
 
 const onCheckout = async () => {
     const cartItems = items.value.map(item => item.product.id);
@@ -217,8 +218,12 @@ const onCheckout = async () => {
             body: cartItems
         })
         console.log(response);
+        // navigateTo('/')
+        if(response){
+          //@ts-ignore
+          window.location.href = response.url
+        }
         clearCart();
-        navigateTo('/')
     }catch(error){
         console.log(error);
         showMessage({
@@ -236,6 +241,24 @@ const onCheckout = async () => {
 
 definePageMeta({
   title: 'Your Shopping Cart'
+})
+
+onMounted(() => {
+    const success = route.query.success
+    if(success === '1'){
+        showMessage({
+            title: "Checkout successful",
+            description: "Your order has been placed successfully.",
+            variant: "success"
+        })
+    }
+    else if(success === '2'){
+        showMessage({
+            title: "Checkout failed",
+            description: "Something went wrong. Please try again.",
+            variant: "destructive"
+        })
+    }
 })
 </script>
 
