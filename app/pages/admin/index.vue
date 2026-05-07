@@ -8,6 +8,10 @@
 definePageMeta({
   middleware: ["admin"],
 });
+
+const { data: analytics, pending, error } = await useFetch('/api/admin/analytics',{
+  lazy:true
+})
 </script>
 
 <style scoped></style>

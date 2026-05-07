@@ -29,3 +29,9 @@ export type SafeProduct = {
     createdAt: string
     updatedAt: string
 }
+
+// analytics types
+export type GraphData = {
+    name: string
+    total: number
+}
