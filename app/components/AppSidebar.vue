@@ -52,7 +52,7 @@ const items = [
 </script>
 
 <template>
-  <Sidebar collapsible="icon" class="bg-white">
+  <Sidebar collapsible="icon">
 
     <!-- header  -->
     <SidebarHeader>
