@@ -29,7 +29,7 @@ const navLinks = [
 <template>
   <header class="sticky top-0 z-50 w-full border-b shadow-lg">
     <div
-      class="mx-auto flex h-16 max-w-screen-2xl items-center gap-6 px-4 lg:px-8"
+      class="mx-auto flex h-16 max-w-screen-2xl items-center gap-6 px-4 lg:px-8 bg-background"
     >
       <!-- Logo -->
       <NuxtLink to="/" class="flex items-center gap-2 shrink-0">
@@ -104,13 +104,13 @@ const navLinks = [
         <!-- Auth Buttons -->
         <div v-if="!user">
           <NuxtLink
-            to="/login"
+            to="/auth/login"
             class="px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200"
           >
             Sign in
           </NuxtLink>
           <NuxtLink
-            to="/register"
+            to="/auth/register"
             class="px-4 py-2 text-sm font-semibold rounded-xl   bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.3)] transition-all duration-200 hover:bg-blue-400 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] active:scale-95"
           >
             Sign up

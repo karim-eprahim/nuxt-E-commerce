@@ -28,17 +28,13 @@
                         </p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <div class="relative group">
+                        <div class="relative group w-full">
                             <Icon name="lucide:search"
                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-indigo-400 z-10 transition-colors"
                                 size="18" />
                             <input type="text" placeholder="Search products..."
-                                class="pl-10 pr-4 py-2.5 w-64 rounded-xl border border-border/50 bg-card/40 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/40 transition-all" />
+                                class="w-full rounded-xl border bg-white/5 py-2 pl-9 pr-4 text-sm placeholder:text-gray-500 outline-none transition-all duration-200 focus:border-blue-500/60 focus: focus:ring-2 focus:ring-blue-500/20" />
                         </div>
-                        <button
-                            class="p-2.5 rounded-xl border border-border/50 bg-card/40 backdrop-blur-md hover:bg-secondary/50 transition-all text-muted-foreground">
-                            <Icon name="lucide:sliders-horizontal" size="20" />
-                        </button>
                     </div>
                 </div>
             </header>

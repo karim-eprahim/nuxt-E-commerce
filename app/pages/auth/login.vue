@@ -131,7 +131,7 @@ const onSubmit = async () => {
             </div>
           </div>
 
-          <Button variant="outline" type="button" :disabled="isLoading">
+          <Button variant="outline" class="border hover:bg-default hover:ring-1" type="button" :disabled="isLoading">
             Github
           </Button>
         </div>
