@@ -1,8 +1,5 @@
 // This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Updated for variant architecture
 
 generator client {
   provider = "prisma-client"
@@ -13,28 +10,37 @@ datasource db {
   provider = "mongodb"
 }
 
-enum UserRole {
-  USER
-  ADMIN
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 model User {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  email          String   @unique
-  role           UserRole @default(USER)
-  name           String?
-  avatarUrl      String?
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  email       String    @unique
+  role        UserRole  @default(USER)
+  name        String?
+  avatarUrl   String?
   hashedPassword String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   // Relations
   oauthAccounts OauthAccount[]
   categories    Category[]
   products      Product[]
   colors        Color[]
   sizes         Size[]
+  cartItems     CartItem[]
+  orders        Order[]
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
 
 model OauthAccount {
@@ -44,11 +50,7 @@ model OauthAccount {
   userId         String   @db.ObjectId
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Unique constraint
+  user           User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([providerId, providerUserId])
 }
 
@@ -63,70 +65,102 @@ model Category {
 }
 
 model Product {
-  id         String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String      @db.ObjectId
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  categoryId String      @db.ObjectId
-  category   Category    @relation("CategoryToProduct", fields: [categoryId], references: [id])
-  name       String
-  price      Float
-  isFeatured Boolean     @default(false)
-  isArchived Boolean     @default(false)
-  sizeId     String      @db.ObjectId
-  size       Size        @relation(fields: [sizeId], references: [id])
-  colorId    String      @db.ObjectId
-  color      Color       @relation(fields: [colorId], references: [id])
-  images     Image[]
-  orderItems OrderItem[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId  String    @db.ObjectId
+  category    Category  @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  name        String
+  description String?
+  images      Image[]
+  variants    ProductVariant[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProductVariant {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  product       Product  @relation(fields: [productId], references: [id])
+  productId     String   @db.ObjectId
+  color         Color?   @relation(fields: [colorId], references: [id])
+  colorId       String?  @db.ObjectId
+  size          Size?    @relation(fields: [sizeId], references: [id])
+  sizeId        String?  @db.ObjectId
+  price         Float  @default(0)
+  stock         Int      @default(0)
+  sku           String?  @unique
+  stripePriceId String?  // optional Stripe price identifier
+  images        Image[]
+  orderItems    OrderItem[]
+  cartItems     CartItem[]
+  @@unique([productId, colorId, sizeId], name: "variant_unique_combination")
 }
 
 model Color {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String    @db.ObjectId
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
-  value     String
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String   @db.ObjectId
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name     String
+  hex      String
+  isSystem Boolean  @default(false)
+  variants ProductVariant[]
 }
 
 model Size {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String    @db.ObjectId
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String
-  value     String
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String   @db.ObjectId
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name     String
+  isSystem Boolean  @default(false)
+  variants ProductVariant[]
+}
+
+model CartItem {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @db.ObjectId
+  variant    ProductVariant @relation(fields: [variantId], references: [id])
+  variantId  String   @db.ObjectId
+  quantity   Int      @default(1)
+  priceAtAdd Float   // snapshot of price when added to cart
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Order {
-  id         String      @id @default(auto()) @map("_id") @db.ObjectId
-  orderItems OrderItem[]
-  isPaid     Boolean     @default(false)
-  phone      String      @default("")
-  address    String      @default("")
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id               String        @id @default(auto()) @map("_id") @db.ObjectId
+  user             User          @relation(fields: [userId], references: [id])
+  userId           String        @db.ObjectId
+  status           OrderStatus   @default(PENDING)
+  total            Float       @default(0)
+  stripeId         String?
+  paymentIntentId  String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  items            OrderItem[]
 }
 
 model OrderItem {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  orderId   String  @db.ObjectId
-  order     Order   @relation(fields: [orderId], references: [id])
-  productId String  @db.ObjectId
-  product   Product @relation(fields: [productId], references: [id])
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  order       Order    @relation(fields: [orderId], references: [id])
+  orderId     String   @db.ObjectId
+  variant     ProductVariant @relation(fields: [variantId], references: [id])
+  variantId   String   @db.ObjectId
+  quantity    Int      @default(1)
+  unitPrice   Float   // price at checkout time
+  totalPrice  Float   @default(0) // unitPrice * quantity
 }
 
 model Image {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  productId String   @db.ObjectId
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   url       String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  productId String?  @db.ObjectId
+  product   Product? @relation(fields: [productId], references: [id])
+  variantId String?  @db.ObjectId
+  variant   ProductVariant? @relation(fields: [variantId], references: [id])
 }
+
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
