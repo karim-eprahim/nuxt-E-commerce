@@ -15,17 +15,22 @@ export type RouteParams = {
 export type SafeProduct = {
     id: string
     name: string
+    title?: string
     price: number
-    description: string
-    images: any
+    description?: string
+    images: any[]
+    thumbnailUrl?: string
+    selectedVariantId?: string
+    variants?: any[]
+    options?: any[]
     categoryId: string
-    categoryName: string
-    sizeId: string
-    colorId: string
+    categoryName?: string
+    sizeId?: string
+    colorId?: string
     size?: any
     color?: any
     category?: any
-    colorName: string
+    colorName?: string
     createdAt: string
     updatedAt: string
 }

@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
     const category = await db.category.create({
       data: {
         name,
+        slug: `${slugify(name)}-${Date.now().toString(36)}`,
         userId: session.user.id,
       },
     });

@@ -138,14 +138,15 @@
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
                                 <span class="text-sm font-bold uppercase tracking-widest text-muted-foreground">Color</span>
-                                <span class="text-sm font-medium">{{ product.color.name }}</span>
+                                <span class="text-sm font-medium">{{ selectedVariant?.title || 'Default' }}</span>
                             </div>
                             <div class="flex flex-wrap gap-3">
-                                <button v-for="color in colors" :key="color.id"
-                                    class="w-10 h-10 rounded-full p-0.5"
-                                    :class="color.id === product.color.id ? 'border-indigo-500 opacity-100' : 'opacity-50'"
-                                    :style="{ backgroundColor: color.value }"
-                                />
+                                <button v-for="value in optionValues('Color')" :key="value"
+                                    class="min-w-10 h-10 rounded-full border px-3 text-xs font-bold"
+                                    :class="selectedOptionValue('Color') === value ? 'border-indigo-500 opacity-100' : 'opacity-50'"
+                                >
+                                    {{ value }}
+                                </button>
                             </div>
                         </div>
 
@@ -157,14 +158,14 @@
                             </div>
                             <div class="flex flex-wrap gap-2">
                                 <button
-                                    v-for="size in sizes"
-                                    :key="size.id"
+                                    v-for="size in optionValues('Size')"
+                                    :key="size"
                                     class="px-5 py-2.5 rounded-xl border text-sm font-bold transition-all duration-300"
-                                    :class="size.id === product.size.id 
+                                    :class="selectedOptionValue('Size') === size 
                                         ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' 
                                         : 'border-border/50 cursor-not-allowed bg-card/40 text-muted-foreground disabled'"
                                 >
-                                    {{ size.name }}
+                                    {{ size }}
                                 </button>
                             </div>
                         </div>
@@ -347,22 +348,11 @@ const productId = route.params.id
 // Fetch Product Data
 const { data: product, pending, error } = await useFetch<any>(`/api/admin/products/${productId}`)
 
-const {data:cashedSizes} = useNuxtData('sizes')
-const { data: sizes,status:sizeStatus } = await useFetch('/api/admin/sizes',{
-    key:'sizes',
-    default(){
-        return cashedSizes.value
-    }
-})
-
-const {data:cashedColors} = useNuxtData('colors')
-const { data: colors,status:colorStatus } = await useFetch('/api/admin/colors',{
-    key:'colors',
-    default(){
-        return cashedColors.value
-    }
-})
-console.log(colors.value)
+const selectedVariant = computed(() => product.value?.variants?.[0])
+const optionValues = (name: string) =>
+    product.value?.options?.find((option: any) => option.name === name)?.values?.map((value: any) => value.value) ?? []
+const selectedOptionValue = (name: string) =>
+    selectedVariant.value?.selections?.find((selection: any) => selection.value.option.name === name)?.value.value
 
 // Carousel & Images Logic
 const api = ref<CarouselApi>()

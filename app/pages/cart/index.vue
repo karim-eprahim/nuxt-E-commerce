@@ -34,7 +34,7 @@
               <!-- Product Image -->
               <div class="relative w-full sm:w-40 h-40 shrink-0 bg-slate-50 rounded-xl overflow-hidden border border-slate-100">
                 <img 
-                  :src="item.product.images[0].url" 
+                  :src="item.product.thumbnailUrl || item.product.images?.[0]?.url" 
                   :alt="item.product.name"
                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -64,23 +64,11 @@
 
                   <!-- Options: Size & Color -->
                   <div class="mt-4 flex flex-wrap gap-4 items-center">
-                    <div v-if="item.product.size" class="flex items-center gap-2">
-                      <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Size:</span>
+                    <div v-for="option in selectedOptions(item.product)" :key="option.name" class="flex items-center gap-2">
+                      <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">{{ option.name }}:</span>
                       <span class="text-sm font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded capitalize">
-                        {{ item.product.size.name }}
+                        {{ option.value }}
                       </span>
-                    </div>
-                    <div v-if="item.product.color" class="flex items-center gap-2">
-                      <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Color:</span>
-                      <div class="flex items-center gap-1.5 bg-slate-100 px-2 py-0.5 rounded">
-                        <div 
-                          class="w-3 h-3 rounded-full border border-slate-300"
-                          :style="{ backgroundColor: item.product.color.value }"
-                        ></div>
-                        <span class="text-sm font-semibold text-slate-700 capitalize">
-                          {{ item.product.color.name }}
-                        </span>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -211,7 +199,10 @@ const { showMessage } = useStore();
 const route = useRoute()
 
 const onCheckout = async () => {
-    const cartItems = items.value.map(item => item.product.id);
+    const cartItems = items.value.map(item => ({
+      variantId: item.product.selectedVariantId || item.product.id,
+      quantity: item.quantity,
+    }));
     try{
         const response = await $fetch('/api/checkout', {
             method: 'POST',
@@ -238,6 +229,12 @@ const onCheckout = async () => {
 //     variant: "success"
 //   });
 };
+
+const selectedOptions = (product: any) =>
+  product.variants?.[0]?.selections?.map((selection: any) => ({
+    name: selection.value.option.name,
+    value: selection.value.value,
+  })) ?? []
 
 definePageMeta({
   title: 'Your Shopping Cart'

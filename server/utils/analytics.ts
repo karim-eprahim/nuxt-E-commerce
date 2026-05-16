@@ -3,31 +3,22 @@ import type { GraphData } from "~~/types";
 export const getTotalRevenue = async () => {
   const paidOrders = await db.order.findMany({
     where: {
-      isPaid: true,
-    },
-    include: {
-      orderItems: {
-        include: {
-          product: true,
-        },
-      },
+      paymentStatus: "PAID",
     },
   });
 
-  const totalRevenue = paidOrders.reduce((total, order) => {
-    const orderTotal = order.orderItems.reduce((orderSum, item) => {
-      return orderSum + item.product.price;
-    }, 0);
-    return total + orderTotal;
-  }, 0);
+  const totalRevenue = paidOrders.reduce((total, order) => total + order.total, 0);
   return totalRevenue;
 };
 
 // stockcount
 export const getStockCount = async () => {
-  const stockcount = await db.product.count({
+  const stockcount = await db.productVariant.count({
     where: {
-      isArchived: false,
+      isActive: true,
+      product: {
+        isArchived: false,
+      },
     },
   });
   return stockcount;
@@ -37,7 +28,7 @@ export const getStockCount = async () => {
 export const getSalesCount = async () => {
   const salescount = await db.order.count({
     where: {
-      isPaid: true,
+      paymentStatus: "PAID",
     },
   });
   return salescount;
@@ -46,14 +37,7 @@ export const getSalesCount = async () => {
 export const getGraphData = async (): Promise<GraphData[]> => {
   const paidOrders = await db.order.findMany({
     where: {
-      isPaid: true,
-    },
-    include: {
-      orderItems: {
-        include: {
-          product: true,
-        },
-      },
+      paymentStatus: "PAID",
     },
   });
 
@@ -61,12 +45,7 @@ export const getGraphData = async (): Promise<GraphData[]> => {
 
   for (const order of paidOrders) {
     const month = order.createdAt.getMonth();
-    let revenueForOrder = 0;
-    for (const item of order.orderItems) {
-      revenueForOrder += item.product.price;
-    }
-
-    monthlyRevenue[month] = (monthlyRevenue[month] || 0) + revenueForOrder;
+    monthlyRevenue[month] = (monthlyRevenue[month] || 0) + order.total;
   }
 
   // converting the grouped data into the format of graphData

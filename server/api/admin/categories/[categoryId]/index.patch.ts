@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
     },
     data: {
       name,
+      slug: `${slugify(name)}-${categoryId}`,
     },
   });
 

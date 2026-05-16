@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../app/generated/prisma"
@@ -13,10 +7,55 @@ datasource db {
   provider = "mongodb"
 }
 
+// Enums
+
 enum UserRole {
   USER
   ADMIN
 }
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum FulfillmentStatus {
+  UNFULFILLED
+  PARTIALLY_FULFILLED
+  FULFILLED
+  RETURNED
+}
+
+enum InventoryTransactionType {
+  PURCHASE
+  SALE
+  RETURN
+  MANUAL_ADJUSTMENT
+  CANCELLATION
+  RESERVATION
+  RESERVATION_RELEASE
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Users and auth
 
 model User {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -25,14 +64,14 @@ model User {
   name           String?
   avatarUrl      String?
   hashedPassword String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
   oauthAccounts OauthAccount[]
   categories    Category[]
   products      Product[]
+  orders        Order[]
+  reviews       Review[]
   colors        Color[]
   sizes         Size[]
 }
@@ -45,88 +84,348 @@ model OauthAccount {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Unique constraint
   @@unique([providerId, providerUserId])
+  @@index([userId])
 }
+
+// Taxonomy
 
 model Category {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String    @db.ObjectId
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String?  @db.ObjectId
+  name        String
+  slug        String   @unique
+  description String?
+  imageUrl    String?
+  parentId    String?  @db.ObjectId
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]  @relation("CategoryToProduct")
+
+  @@index([userId])
+  @@index([parentId])
+  @@index([isActive])
+}
+
+model Brand {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
-  products  Product[] @relation("CategoryToProduct")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  slug      String   @unique
+  logoUrl   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@index([isActive])
 }
 
-model Product {
-  id         String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String      @db.ObjectId
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  categoryId String      @db.ObjectId
-  category   Category    @relation("CategoryToProduct", fields: [categoryId], references: [id])
-  name       String
-  price      Float
-  isFeatured Boolean     @default(false)
-  isArchived Boolean     @default(false)
-  sizeId     String      @db.ObjectId
-  size       Size        @relation(fields: [sizeId], references: [id])
-  colorId    String      @db.ObjectId
-  color      Color       @relation(fields: [colorId], references: [id])
-  images     Image[]
-  orderItems OrderItem[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-}
-
+// Legacy admin lookup models. Product architecture uses ProductOption instead.
 model Color {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String    @db.ObjectId
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
   name      String
   value     String
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([name])
 }
 
 model Size {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String    @db.ObjectId
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
   name      String
   value     String
-  products  Product[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([name])
 }
 
-model Order {
-  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+// Flexible product attributes
+
+model ProductOption {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId String   @db.ObjectId
+  name      String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product              @relation(fields: [productId], references: [id], onDelete: Cascade)
+  values  ProductOptionValue[]
+
+  @@unique([productId, name])
+  @@index([productId])
+  @@index([position])
+}
+
+model ProductOptionValue {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  optionId  String   @db.ObjectId
+  value     String
+  metadata  Json?
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  option     ProductOption            @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  selections VariantOptionSelection[]
+
+  @@unique([optionId, value])
+  @@index([optionId])
+  @@index([position])
+}
+
+model VariantOptionSelection {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  variantId String @db.ObjectId
+  valueId   String @db.ObjectId
+
+  variant ProductVariant     @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  value   ProductOptionValue @relation(fields: [valueId], references: [id], onDelete: Cascade)
+
+  @@unique([variantId, valueId])
+  @@index([variantId])
+  @@index([valueId])
+}
+
+// Products
+
+model Product {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @db.ObjectId
+  categoryId    String   @db.ObjectId
+  brandId       String?  @db.ObjectId
+  title         String
+  slug          String   @unique
+  description   String?
+  isFeatured    Boolean  @default(false)
+  isArchived    Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  tags          String[]
+  averageRating Float    @default(0)
+  reviewsCount  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category         @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  brand    Brand?           @relation(fields: [brandId], references: [id])
+  images   ProductImage[]
+  options  ProductOption[]
+  variants ProductVariant[]
+  reviews  Review[]
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([isFeatured])
+  @@index([isArchived])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+model ProductImage {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId   String   @db.ObjectId
+  url         String
+  altText     String?
+  isThumbnail Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([isThumbnail])
+  @@index([sortOrder])
+}
+
+model ProductVariant {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId      String   @db.ObjectId
+  sku            String   @unique
+  barcode        String?
+  title          String
+  price          Float
+  compareAtPrice Float?
+  costPrice      Float?
+  weight         Float?
+  trackInventory Boolean  @default(true)
+  isActive       Boolean  @default(true)
+  position       Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  product    Product                  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  images     VariantImage[]
+  selections VariantOptionSelection[]
+  inventory  VariantInventory?
   orderItems OrderItem[]
-  isPaid     Boolean     @default(false)
-  phone      String      @default("")
-  address    String      @default("")
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+
+  @@index([productId])
+  @@index([barcode])
+  @@index([isActive])
+  @@index([position])
+}
+
+model VariantImage {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  variantId   String   @db.ObjectId
+  url         String
+  altText     String?
+  isThumbnail Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@index([variantId])
+  @@index([isThumbnail])
+  @@index([sortOrder])
+}
+
+// Inventory
+
+model VariantInventory {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  variantId         String   @unique @db.ObjectId
+  stockQuantity     Int      @default(0)
+  reservedQuantity  Int      @default(0)
+  lowStockThreshold Int      @default(5)
+  allowBackorders   Boolean  @default(false)
+  inStock           Boolean  @default(false)
+  updatedAt         DateTime @updatedAt
+
+  variant      ProductVariant         @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  transactions InventoryTransaction[]
+
+  @@index([inStock])
+  @@index([stockQuantity])
+}
+
+model InventoryTransaction {
+  id             String                   @id @default(auto()) @map("_id") @db.ObjectId
+  inventoryId    String                   @db.ObjectId
+  type           InventoryTransactionType
+  quantityBefore Int
+  quantityAfter  Int
+  delta          Int
+  referenceId    String?
+  referenceType  String?
+  note           String?
+  createdBy      String?                  @db.ObjectId
+  createdAt      DateTime                 @default(now())
+
+  inventory VariantInventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+
+  @@index([inventoryId])
+  @@index([type])
+  @@index([referenceId])
+  @@index([createdAt])
+}
+
+// Reviews
+
+model Review {
+  id                 String       @id @default(auto()) @map("_id") @db.ObjectId
+  productId          String       @db.ObjectId
+  userId             String       @db.ObjectId
+  orderId            String?      @db.ObjectId
+  rating             Int
+  title              String?
+  comment            String?
+  imageUrls          String[]
+  helpfulCount       Int          @default(0)
+  isVerifiedPurchase Boolean      @default(false)
+  status             ReviewStatus @default(PENDING)
+  adminReply         String?
+  adminRepliedAt     DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([productId])
+  @@index([userId])
+  @@index([orderId])
+  @@index([status])
+  @@index([rating])
+  @@index([createdAt])
+}
+
+// Orders
+
+model Order {
+  id                String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String?           @db.ObjectId
+  orderNumber       String            @unique
+  status            OrderStatus       @default(PENDING)
+  paymentStatus     PaymentStatus     @default(PENDING)
+  fulfillmentStatus FulfillmentStatus @default(UNFULFILLED)
+  subtotal          Float
+  discountAmount    Float             @default(0)
+  taxAmount         Float             @default(0)
+  shippingFee       Float             @default(0)
+  total             Float
+  currency          String            @default("USD")
+  phone             String?
+  shippingAddress   Json?
+  billingAddress    Json?
+  notes             String?
+  stripeSessionId   String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  user       User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  orderItems OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([fulfillmentStatus])
+  @@index([createdAt])
 }
 
 model OrderItem {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  orderId   String  @db.ObjectId
-  order     Order   @relation(fields: [orderId], references: [id])
-  productId String  @db.ObjectId
-  product   Product @relation(fields: [productId], references: [id])
-}
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String @db.ObjectId
+  variantId String @db.ObjectId
+  quantity  Int
 
-model Image {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  productId String   @db.ObjectId
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  url       String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  snapshotProductTitle String
+  snapshotVariantTitle String
+  snapshotSku          String
+  snapshotImageUrl     String?
+  snapshotOptions      Json?
+  unitPrice            Float
+  subtotal             Float
+  discountAmount       Float   @default(0)
+  taxAmount            Float   @default(0)
+
+  order   Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+  @@index([variantId])
 }
