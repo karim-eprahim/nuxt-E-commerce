@@ -96,7 +96,7 @@ model Category {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   userId      String?  @db.ObjectId
   name        String
-  slug        String   @unique
+  // slug        String   @unique
   description String?
   imageUrl    String?
   parentId    String?  @db.ObjectId

@@ -510,6 +510,8 @@ const onSubmit = async () => {
     const url = isEditing.value ? `/api/admin/products/${params.productId}` : "/api/admin/products";
     const method = isEditing.value ? "PATCH" : "POST";
 
+    console.log(buildPayload());
+
     await $fetch(url, { method, body: buildPayload() });
     await refreshNuxtData("products");
 

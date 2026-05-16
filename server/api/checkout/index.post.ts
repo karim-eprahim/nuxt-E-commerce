@@ -1,10 +1,12 @@
 import { stripe } from "../../utils/stripe";
 
-type CheckoutLineInput = string | {
-  productId?: string;
-  variantId?: string;
-  quantity?: number;
-};
+type CheckoutLineInput =
+  | string
+  | {
+      productId?: string;
+      variantId?: string;
+      quantity?: number;
+    };
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<CheckoutLineInput[]>(event);
@@ -20,10 +22,7 @@ export default defineEventHandler(async (event) => {
   const requestedIds = lines.map((line) => line.variantId);
   const matchingVariants = await db.productVariant.findMany({
     where: {
-      OR: [
-        { id: { in: requestedIds } },
-        { productId: { in: requestedIds } },
-      ],
+      OR: [{ id: { in: requestedIds } }, { productId: { in: requestedIds } }],
       isActive: true,
       product: {
         isArchived: false,
@@ -47,7 +46,12 @@ export default defineEventHandler(async (event) => {
   });
 
   const variants = lines
-    .map((line) => matchingVariants.find((item) => item.id === line.variantId || item.productId === line.variantId))
+    .map((line) =>
+      matchingVariants.find(
+        (item) =>
+          item.id === line.variantId || item.productId === line.variantId,
+      ),
+    )
     .filter(Boolean);
 
   if (variants.length !== lines.length) {
@@ -57,9 +61,14 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const lineByVariantId = new Map<string, { variantId: string; quantity: number }>();
+  const lineByVariantId = new Map<
+    string,
+    { variantId: string; quantity: number }
+  >();
   for (const line of lines) {
-    const variant = matchingVariants.find((item) => item.id === line.variantId || item.productId === line.variantId);
+    const variant = matchingVariants.find(
+      (item) => item.id === line.variantId || item.productId === line.variantId,
+    );
     if (variant) lineByVariantId.set(variant.id, line);
   }
 
@@ -90,8 +99,12 @@ export default defineEventHandler(async (event) => {
       orderItems: {
         create: variants.map((variant) => {
           const quantity = lineByVariantId.get(variant.id)?.quantity ?? 1;
-          const productImage = variant.product.images?.find((image: any) => image.isThumbnail) ?? variant.product.images?.[0];
-          const variantImage = variant.images?.find((image: any) => image.isThumbnail) ?? variant.images?.[0];
+          const productImage =
+            variant.product.images?.find((image: any) => image.isThumbnail) ??
+            variant.product.images?.[0];
+          const variantImage =
+            variant.images?.find((image: any) => image.isThumbnail) ??
+            variant.images?.[0];
 
           return {
             variantId: variant.id,
@@ -119,7 +132,9 @@ export default defineEventHandler(async (event) => {
       where: { variantId: variant.id },
       data: {
         reservedQuantity: after,
-        inStock: variant.inventory.allowBackorders || variant.inventory.stockQuantity - after > 0,
+        inStock:
+          variant.inventory.allowBackorders ||
+          variant.inventory.stockQuantity - after > 0,
       },
     });
 
