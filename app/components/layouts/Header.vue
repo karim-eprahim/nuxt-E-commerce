@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   ShoppingBag,
 } from "lucide-vue-next";
+import ThemeToggle from '../ThemeToggle.vue'
 
 const { user, clear } = useUserSession();
 const logout = async () => {
@@ -17,9 +18,6 @@ const isDark = ref(false);
 const searchQuery = ref("");
 const { items, quantity } = useCart();
 
-function toggleTheme() {
-  isDark.value = !isDark.value;
-}
 
 const navLinks = [
   { label: "Products", to: "/products" },
@@ -29,9 +27,9 @@ const navLinks = [
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 w-full border-b shadow-lg bg-white">
+  <header class="sticky top-0 z-50 w-full border-b shadow-lg">
     <div
-      class="mx-auto flex h-16 max-w-screen-2xl items-center gap-6 px-4 lg:px-8"
+      class="mx-auto flex h-16 max-w-screen-2xl items-center gap-6 px-4 lg:px-8 bg-background"
     >
       <!-- Logo -->
       <NuxtLink to="/" class="flex items-center gap-2 shrink-0">
@@ -73,15 +71,8 @@ const navLinks = [
 
       <!-- Right Side Actions -->
       <div class="flex items-center gap-1 ml-auto shrink-0">
-        <!-- Theme Toggle -->
-        <button
-          @click="toggleTheme"
-          class="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-200"
-          :title="isDark ? 'Light mode' : 'Dark mode'"
-        >
-          <Sun v-if="isDark" class="h-4.5 w-4.5" />
-          <Moon v-else class="h-4.5 w-4.5" />
-        </button>
+
+        <ThemeToggle />
 
         <!-- Wishlist -->
         <button
@@ -101,7 +92,7 @@ const navLinks = [
           <Icon name="lucide:shopping-cart" size="20" />
           <span
             v-if="quantity > 0"
-            class="absolute text-white -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold"
+            class="absolute   -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold"
           >
             {{ quantity }}
           </span>
@@ -113,14 +104,14 @@ const navLinks = [
         <!-- Auth Buttons -->
         <div v-if="!user">
           <NuxtLink
-            to="/login"
+            to="/auth/login"
             class="px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200"
           >
             Sign in
           </NuxtLink>
           <NuxtLink
-            to="/register"
-            class="px-4 py-2 text-sm font-semibold rounded-xl text-white bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.3)] transition-all duration-200 hover:bg-blue-400 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] active:scale-95"
+            to="/auth/register"
+            class="px-4 py-2 text-sm font-semibold rounded-xl   bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.3)] transition-all duration-200 hover:bg-blue-400 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] active:scale-95"
           >
             Sign up
           </NuxtLink>

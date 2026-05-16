@@ -1,5 +1,5 @@
 <template>
-  <Card class="overflow-hidden border-none shadow-sm transition-all hover:shadow-md">
+  <Card class="overflow-hidden border-none shadow-md transition-all hover:shadow-lg">
     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle class="text-sm font-medium">
         {{ title }}
@@ -14,10 +14,6 @@
         {{ description }}
       </p>
     </CardContent>
-    <!-- Background Gradient Decoration -->
-    <div 
-      class="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary/5 blur-3xl"
-    ></div>
   </Card>
 </template>
 

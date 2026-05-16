@@ -27,10 +27,17 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     'nuxt-auth-utils',
     '@nuxt/image',
+    '@nuxtjs/color-mode',
   ],
   shadcn: {
     prefix: '',
     componentDir: './app/components/ui'
+  },
+
+  colorMode: {
+    preference: "system",
+    fallback: "light",
+    classSuffix: "",
   },
 
 })

@@ -66,7 +66,7 @@
           />
         </div>
 
-        <Card class="col-span-4 overflow-hidden border-none shadow-sm">
+        <Card class="col-span-4 overflow-hidden border-none shadow-md">
           <CardHeader>
             <CardTitle>Overview</CardTitle>
           </CardHeader>

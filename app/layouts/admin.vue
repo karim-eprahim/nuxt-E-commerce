@@ -7,7 +7,7 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 </script>
 
 <template>
-    <SidebarLayout class="bg-white" color="slate">
+    <SidebarLayout color="slate">
         <!-- <Header /> -->
         <header class="border-b py-2 px-3 lg:px-6">
             <div class="flex items-center justify-between">

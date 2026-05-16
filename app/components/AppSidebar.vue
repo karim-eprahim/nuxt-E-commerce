@@ -49,10 +49,15 @@ const items = [
     icon: Users,
   },
 ]
+const { user, clear } = useUserSession();
+const logout = async () => {
+  await clear();
+  navigateTo("/auth/login");
+};
 </script>
 
 <template>
-  <Sidebar collapsible="icon" class="bg-white">
+  <Sidebar collapsible="icon">
 
     <!-- header  -->
     <SidebarHeader>
@@ -107,25 +112,25 @@ const items = [
             <DropdownMenuTrigger as-child>
               <SidebarMenuButton class="h-30">
                 <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                  <AvatarFallback>CN</AvatarFallback>
+                  <AvatarImage :src="user?.avatarUrl|| ''" :alt="user?.name || ''" />
+                  <AvatarFallback>{{ user?.name?.charAt(0) }}</AvatarFallback>
                 </Avatar>
                 <div class="flex flex-col">
-                  <span class="font-bold">karim Ebrahim</span>
-                  <span class="text-sm">admin</span>
+                  <span class="font-bold">{{ user?.name }}</span>
+                  <span class="text-sm">{{ user?.role }}</span>
                 </div>
                 <Icon class="ml-auto" name="lucide:chevron-up" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" class="w-(--reka-popper-anchor-width)">
-              <DropdownMenuItem>
+              <!-- <DropdownMenuItem>
                 <span>Account</span>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <span>Billing</span>
-              </DropdownMenuItem>
+              </DropdownMenuItem> -->
               <DropdownMenuItem>
-                <span>Sign out</span>
+                <span @click="logout">Sign out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
